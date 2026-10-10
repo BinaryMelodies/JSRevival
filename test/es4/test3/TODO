@@ -1,0 +1,3 @@
+does not work
+	if TransientPackage.PartialPackage gets remapped to ./, then when loading PartialFunction.js, it fails to recognize that it belongs to an open package
+	since it is not found under a directory called TransientPackage/PartialPackage

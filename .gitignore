@@ -1,0 +1,7 @@
+*~
+**/.history
+bin/
+out/
+html/
+latex/
+*.node

@@ -1,0 +1,1132 @@
+# Every object has a type, the supported types are:
+#	U undefined
+#	O object (or null)
+#	F function
+#	C constructor (also a JavaScript function)
+#	B boolean
+#	N number
+#	S string
+#	Z symbol
+#	I bigint
+#	* an internal value or record (in global scope: a name in the intrinsics object that evaluates to an alias)
+#	T an internal type, exotic object layout
+#	A accessor (a property type)
+#	> the layout of the returned type (only for functions)
+#	: the C++ type for objects of this layout
+#	= the C++ type for the ES4 class object
+# Objects appearing as data properties can have attributes (added via "+" or "-" and an identifier) and their name is listed as a "string" or [Symbol.reference]
+# Attributes supported include: Writable, Enumerable, Configurable (deletable), ECMAScript 4: Instance property for class instances, Final (only for instance properties)
+# All entities can then be followed by ":=" and an initial value specification
+# Functions (including constructors) are followed by an optional "=" and function name, then "/" and a length count
+# All objects (including functions, constructors) can specify their prototype via ":"
+# ECMAScript 4 constructors (classes) can specify their superclass via "<:"
+# All objects can have attributes attached
+# The "=:" operator declares the entry as a globally identifiable name (used internally); if the property name is a literal identifier, that will also create a globally identifiable name
+# Objects with "{" and "}" at their end have a special object layout (identified as a constructor or internal type)
+# Arguments to the object constructor can be provided between '("' and '")'
+# ECMASCript 4 objects with "<" and ">" at their end use that value as the static type of the property field
+# lines starting with "~" signal an alternative definition for other versions
+
+%define	NativeError	NativeError
+6	C	{NativeError}/1 : Error <: Error
+~1!6	C	{NativeError}/1 <: Error
+4		=		"JS::Runtime::Builtin::ErrorSubClass"("{NativeError}", {NativeError}.prototype)
+1		O	-W-E-C+I	"prototype" : Error.prototype <Object>
+1			C			"constructor" := {NativeError}
+1			S	+W-E-C	"message" := ""
+1			S	+W-E-C	"name" := "{NativeError}"
+%end	NativeError
+
+%define	TypedArray	TypedArray	Type	BYTES_PER_ELEMENT
+6	C	{TypedArray}/3 : TypedArray {{TypedArrayConstructor("&realm, JS::Class::TypedArray::ElementType::{Type}, &Intrinsics::{TypedArray}_prototype") }}
+7		N	-W-E-C	"BYTES_PER_ELEMENT" := {BYTES_PER_ELEMENT}
+6		O	-W-E-C	"prototype" : TypedArray.prototype
+6			N	-W-E-C	"BYTES_PER_ELEMENT" := {BYTES_PER_ELEMENT}
+6			C		"constructor" := {TypedArray}
+%end
+
+%define	IntegerClass	IntegerClass	MIN_VALUE	MAX_VALUE
+4	C	{IntegerClass}/1 <: GeneralNumber
+4		=		"JS::Runtime::Builtin::IntegerClass"("{IntegerClass}", {MIN_VALUE} <int> , {MAX_VALUE} <int> )
+4		O	-W-E-C+I	"prototype" := GeneralNumber.prototype
+4		N		"MAX_VALUE" := {MIN_VALUE} <Number>
+4		N		"MIN_VALUE" := {MAX_VALUE} <Number>
+%end
+
+1	O		global : host_defined
+12		C		AggregateError/1
+12			O	-W-E-C	"prototype" : Error.prototype
+12				C		"constructor" := AggregateError
+12				S		"message" := ""
+12				S		"name" := "AggregateError"
+1		C		Array/1
+1			:		"JS::Class::Array"
+4			=		"JS::Runtime::Builtin::ArrayClass"
+6			F		"from"/1
+5			F		"isArray"/1
+6			F		"of"/0
+1!4			O	-W-E-C	"prototype" {Array} <Object>
+~4			O	-W-E-C+I	"prototype"
+1!4				N	+W-E-C	"length" := +0.0
+13				F		"at"/1
+3				F		"concat"/1
+1				C		"constructor" := Array <Class>
+6				F		"copyWithin"/2
+6				F		"entries"/0
+5				F		"every"/1
+6				F		"fill"/1
+5				F		"filter"/1
+6				F		"find"/1
+6				F		"findIndex"/1
+14				F		"findLast"/1
+14				F		"findLastIndex"/1
+10				F		"flat"/0
+10				F		"flatMap"/1
+5				F		"forEach"/1
+7				F		"includes"/1
+5				F		"indexOf"/1
+1				F		"join"/1
+6				F		"keys"/0
+5				F		"lastIndexOf"/1
+5				F		"map"/1
+3				F		"pop"/0
+3				F		"push"/1
+5				F		"reduce"/1
+5				F		"reduceRight"/1
+1				F		"reverse"/0
+3				F		"shift"/0
+3				F		"slice"/2
+5				F		"some"/1
+1				F		"sort"/1
+3				F		"splice"/2
+3				F		"toLocaleString"/0
+14				F		"toReversed"/0
+14				F		"toSorted"/1
+14				F		"toSpliced"/2
+1				F		"toString"/0
+3				F		"unshift"/1
+6				F		"values"/0 =: Array_prototype_values
+14				F		"with"/2
+6				F		[Symbol.iterator] := Array.prototype.values
+6				O	-W-E-C	[Symbol.unscopables] : null
+13					B	+W+E+C	"at" := true
+6					B	+W+E+C	"copyWithin" := true
+6					B	+W+E+C	"entries" := true
+6					B	+W+E+C	"fill" := true
+6					B	+W+E+C	"find" := true
+6					B	+W+E+C	"findIndex" := true
+14					B	+W+E+C	"findLast" := true
+14					B	+W+E+C	"findLastIndex" := true
+10					B	+W+E+C	"flat" := true
+10					B	+W+E+C	"flatMap" := true
+7					B	+W+E+C	"includes" := true
+6					B	+W+E+C	"keys" := true
+14					B	+W+E+C	"toReversed" := true
+14					B	+W+E+C	"toSorted" := true
+14					B	+W+E+C	"toSpliced" := true
+6					B	+W+E+C	"values" := true
+6			A		[Symbol.species]
+6				F		get = "get [Symbol.species]"
+			>
+1!4				N	+W-E-C	"length"
+4				N	+W-E-C+I	Array_private::length := 0.0 <Number>
+4				A	+I	"length"
+4					F	-E+F	get
+4					F	-E+F	set
+4		%NativeError(ArgumentError)
+6		C		ArrayBuffer/1
+6			F		"isView"/1
+6			O	-W-E-C	"prototype"
+6				A		"byteLength"
+6					F		get
+6				C		"constructor" := ArrayBuffer
+15				A		"detached"
+15					F		get
+15				A		"maxByteLength"
+15					F		get
+15				A		"resizable"
+15					F		get
+15				F		"resize"/1
+7				F		"slice"/2
+15				F		"transfer"/0
+15				F		"transferToFixedLength"/0
+6				S	-W-E+C	[Symbol.toStringTag] := "ArrayBuffer"
+6			A		[Symbol.species]
+6				F		get = "get [Symbol.species]"
+8		O		Atomics
+8			F		"add"/3
+8			F		"and"/3
+8			F		"compareExchage"/4
+8			F		"exchange"/3
+8			F		"isLockFree"/1
+8			F		"load"/2
+10			F		"notify"/3 # renamed from wake
+8			F		"or"/3
+8			F		"store"/3
+8			F		"sub"/3
+8			F		"wait"/4
+15			F		"waitAsync"/4
+8!10			F		"wake"/3 # renamed to notify
+8			F		"xor"/3
+8			S	-W-E+C	[Symbol.toStringTag] := "Atomics"
+4		C		Attribute/1
+4			=		"JS::Runtime::Builtin::AttributeClass"
+4			O	-W-E-C+I	"prototype" := Object.prototype
+4		%NativeError(AttributeError)
+11		C		BigInt/1
+11			F		"asIntN"/2
+11			F		"asUintN"/2
+11			O	-W-E-C	"prototype"
+11				C		"constructor" := BigInt
+11				F		"toLocaleString"/0
+11				F		"toString"/0
+11				F		"valueOf"/0
+11				S	-W-E+C	[Symbol.toStringTag] := "BigInt"
+11		%TypedArray(BigInt64Array, BigInt64, 8)
+11		%TypedArray(BigUint64Array, BigUint64, 8)
+1		C		Boolean/1
+4			=		"JS::Runtime::Builtin::BooleanClass"
+1			:		"JS::Class::Boolean"
+1			O	-W-E-C+I	"prototype" {Boolean} <Object>
+1!4				B		[[BooleanData]] := false
+1				C		"constructor" := Boolean
+1				F		"toString"/0
+1				F		"valueOf"/0
+4		%IntegerClass(byte, 0, 255)
+4		C		char/1
+4			=		"JS::Runtime::Builtin::CharClass"
+4			F		"fromCharCode"/1
+4			O	-W-E-C+I	"prototype" <Object>
+4				C		"constructor" := char
+4				F		"toString"/0
+4				F		"valueOf"/0
+4		C		Class/1
+4			=		"JS::Runtime::Builtin::ClassClass"
+4			O	-W-E-C+I	"prototype" <Object>
+4				C		"constructor" := Class
+4				N	-W-E-C	"length" := 1 <Number>
+4				F		"toString"/0
+4			>
+4				A	+I	"prototype"
+4					F	-E+F	get
+4		%NativeError(ConstantError)
+6		C		DataView/1
+6			O	-W-E-C	"prototype"
+6				A		"buffer"
+6					F		get
+6				A		"byteLength"
+6					F		get
+6				A		"byteOffset"
+6					F		get
+6				C		"constructor" := DataView
+11				F		"getBigInt64"/1
+11				F		"getBigUint64"/1
+16				F		"getFloat16"/1
+6				F		"getFloat32"/1
+6				F		"getFloat64"/1
+6				F		"getInt8"/1
+6				F		"getInt16"/1
+6				F		"getInt32"/1
+6				F		"getUint8"/1
+6				F		"getUint16"/1
+6				F		"getUint32"/1
+11				F		"setBigInt64"/2
+11				F		"setBigUint64"/2
+16				F		"setFloat16"/2
+6				F		"setFloat32"/2
+6				F		"setFloat64"/2
+6				F		"setInt8"/2
+6				F		"setInt16"/2
+6				F		"setInt32"/2
+6				F		"setUint8"/2
+6				F		"setUint16"/2
+6				F		"setUint32"/2
+6				S	-W-E+C	[Symbol.toStringTag] := "DataView"
+1		C		Date/7
+1			:		"JS::Class::Date"
+4			=		"JS::Runtime::Builtin::DateClass"
+5			F		"now"/0
+1			F		"parse"/1
+6			O	-W-E-C+I	"prototype"
+~1!6			O	-W-E-C+I	"prototype" {Date}
+1!6				N		[[DateValue]] := NaN
+1				C		"constructor" := Date
+1				F		"getDate"/0
+1				F		"getDay"/0
+1				F		"getFullYear"/0
+1				F		"getHours"/0
+1				F		"getMilliseconds"/0
+1				F		"getMinutes"/0
+1				F		"getMonth"/0
+1				F		"getSeconds"/0
+1				F		"getTime"/0
+1				F		"getTimezoneOffset"/0
+1				F		"getUTCDate"/0
+1				F		"getUTCDay"/0
+1				F		"getUTCFullYear"/0
+1				F		"getUTCHours"/0
+1				F		"getUTCMilliseconds"/0
+1				F		"getUTCMinutes"/0
+1				F		"getUTCMonth"/0
+1				F		"getUTCSeconds"/0
+1W				F		"getYear"/0
+1				F		"setDate"/1
+1				F		"setFullYear"/3
+1				F		"setHours"/4
+1				F		"setMilliseconds"/1
+1				F		"setMinutes"/3
+1				F		"setMonth"/2
+1				F		"setSeconds"/2
+1				F		"setTime"/1
+1				F		"setUTCDate"/1
+1				F		"setUTCFullYear"/3
+1				F		"setUTCHours"/4
+1				F		"setUTCMilliseconds"/1
+1				F		"setUTCMinutes"/3
+1				F		"setUTCMonth"/2
+1				F		"setUTCSeconds"/2
+1				F		"setYear"/1
+3				F		"toDateString"/0
+1				F		"toGMTString"/0
+5				F		"toISOString"/0
+5				F		"toJSON"/1
+3				F		"toLocaleDateString"/0
+1				F		"toLocaleString"/0
+3				F		"toLocaleTimeString"/0
+1				F		"toString"/0
+3				F		"toTimeString"/0
+1				F		"toUTCString"/0
+1				F		"valueOf"/0
+6				F	-W-E-C	[Symbol.toPrimitive] = "[Symbol.toPrimitive]"/1
+1			F		"UTC"/7
+D		C		decimal/1 <: GeneralNumber
+D			=		"JS::Runtime::Builtin::DecimalClass"
+D			O		"prototype" <Object>
+D				C		"constructor" := decimal <Class>
+3		F		"decodeURI"/1
+3		F		"decodeURIComponent"/1
+4		%NativeError(DefinitionError)
+4		*	-W-E-C	"dynamic" := "JSValue(JSCompoundAttribute().WithDynamic(true))" <Attribute>
+3		F		"encodeURI"/1
+3		F		"encodeURIComponent"/1
+4		*	-W-E-C	"enumerable" := "JSValue(JSCompoundAttribute().WithEnumerable(true))" <Attribute>
+4		*	-W-E-C	"explicit" := "JSValue(JSCompoundAttribute().WithExplicit(true))" <Attribute>
+3		C		"Error" := Error
+W1		F		"escape"/1
+1		F		"eval"/1
+3		C		"EvalError" := EvalError
+12		C		FinalizationRegistry/1
+12			O	-W-E-C	"prototype"
+12				C		"constructor" := FinalizationRegistry
+12				F		"register"/2
+12				F		"unregister"/1
+12				S	-W-E+C	[Symbol.toStringTag] := "FinalizationRegistry"
+4		*	-W-E-C	"final" := "JSValue(JSCompoundAttribute().WithCategory(JS::Runtime::MemberModifier::Final))" <Attribute>
+4		N	-W-E-C	"fInfinity" := Infinity <float>
+4		C		float/1 <: GeneralNumber
+4			=		"JS::Runtime::Builtin::FloatClass"
+4			O		"prototype" <Object>
+4				C		"constructor" := float <Class>
+4				F		"toString"/1
+4				F		"valueOf"/1
+4			N		"MAX_VALUE" := 0 <float> # TODO
+4			N		"MIN_VALUE" := 0 <float> # TODO
+4			N		"NaN" := NaN <float>
+4			N		"NEGATIVE_INFINITY" := -Infinity <float>
+4			N		"POSITIVE_INFINITY" := Infinity <float>
+16		%TypedArray(Float16Array, Float16, 2)
+6		%TypedArray(Float32Array, Float32, 4)
+6		%TypedArray(Float64Array, Float64, 8)
+4		N	-W-E-C	"fNaN" := NaN <float>
+1		C		Function/1
+1			:		"JS::Runtime::Builtin::NativeFunction"
+4			=		"JS::Runtime::Builtin::FunctionClass"
+!4			F	-W-E-C	"prototype" = ""/0 : Object.prototype {BuiltinFunction}
+~4			O	-W-E-C+I	"prototype" <Object>
+3				F		"apply"/2
+5				F		"bind"/1
+3				F		"call"/1
+1				C		"constructor" := Function
+1				F		"toString"/1
+6				F	-W-E-C	[Symbol.hasInstance] = "[Symbol.hasInstance]"/1
+			>
+6				N	-W-E+C	"length"
+1!6!4				N	-W-E-C	"length"
+4				N	-W-E-C+I+F	"length" := 0.0 <Number>
+6				S	-W-E+C	"name"
+1				O	+W-E-C	"prototype"
+4		C		GeneralNumber/1
+4			=		"JS::Runtime::Builtin::GeneralNumberClass"
+4			O		"prototype"
+4				C		"constructor" := GeneralNumber <Class>
+4				F		"toExponential"/1 # := Number.prototype.toExponential
+4				F		"toFixed"/1 # := Number.prototype.toFixed
+4				F		"toPrecision"/1 # := Number.prototype.toPrecision
+4				F		"toString"/1
+4				F		"valueOf"/1
+11		O	+W-E+C	"globalThis"
+1		N	-W-E-C	"Infinity" := Infinity <Number>
+4		%IntegerClass(int, -2147483648, 2147483647)
+6		%TypedArray(Int8Array, Int8, 1)
+6		%TypedArray(Int16Array, Int16, 2)
+6		%TypedArray(Int32Array, Int32, 4)
+4		*	-W-E-C-X	internal::internal := "internal" <Namespace>
+1		F		"isFinite"/1
+1		F		"isNaN"/1
+X		F		"isXMLName"/1
+16		C		Iterator/0
+16			F		"from"/1
+16			O	-W-E-C	"prototype" := IteratorPrototype
+# ActionScript 3 contains this class so it is included here
+5		O		JSON : JSON_prototype {JSONClass} <JSONClass>
+~4		O		JSON : JSON_prototype {SingletonClass} <JSONClass>
+5			S		[[Class]] := "JSON"
+4,5			F		"parse"/2
+4,5			F		"stringify"/3
+6			S	-W-E+C	[Symbol.toStringTag] := "JSON"
+4		C		long/1 <: GeneralNumber
+4			=		"JS::Runtime::Builtin::LongClass"
+4			O		"prototype" <Object>
+4				C		"constructor" := long <Class>
+4				F		"toString"/1
+4				F		"valueOf"/1
+4			I		"MAX_VALUE" := 9223372036854775807 <long>
+4			I		"MIN_VALUE" := -9223372036854775808 <long>
+6		C		Map/0
+15			F		"groupBy"/2
+6			O	-W-E-C	"prototype"
+6				F		"clear"/0
+6				C		"constructor" := Map
+6				F		"delete"/1
+6				F		"entries"/0
+6				F		"forEach"/1
+6				F		"get"/1
+6				F		"has"/1
+6				F		"keys"/0
+6				F		"set"/2
+6				A		"size"
+6					F		get
+6				F		"values"/0
+6				F		[Symbol.iterator] := Map.prototype.entries
+6				S	-W-E+C	[Symbol.toStringTag] := "Map"
+6			A		[Symbol.species]
+6				F		get = "get [Symbol.species]"
+1!4		O		Math : Math_prototype {MathClass} <MathClass>
+~4		O		Math : Math_prototype {SingletonClass} <MathClass>
+1!6!4			S		[[Class]] := "Math"
+1			F		"abs"/1
+1			F		"acos"/1
+6			F		"acosh"/1
+1			F		"asin"/1
+6			F		"asinh"/1
+1			F		"atan"/1
+6			F		"atanh"/1
+1			F		"atan2"/2
+6			F		"cbrt"/1
+1			F		"ceil"/1
+6			F		"clz32"/1
+1			F		"cos"/1
+6			F		"cosh"/1
+1			N	-W-E-C	"E" := 0 # TODO
+1			F		"exp"/1
+6			F		"expm1"/1
+1			F		"floor"/1
+16			F		"f16round"/1
+6			F		"fround"/1
+6			F		"hypot"/2
+6			F		"imul"/2
+1			N	-W-E-C	"LN2" := 0 # TODO
+1			N	-W-E-C	"LN10" := 0 # TODO
+1			F		"log"/1
+6			F		"log1p"/1
+6			F		"log2"/1
+1			N	-W-E-C	"LOG2E" := 0 # TODO
+6			F		"log10"/1
+1			N	-W-E-C	"LOG10E" := 0 # TODO
+1			F		"max"/2
+1			F		"min"/2
+1			N	-W-E-C	"PI" := 0 # TODO
+1			F		"pow"/2
+1			F		"random"/0
+1			F		"round"/1
+6			F		"sign"/1
+1			F		"sin"/1
+6			F		"sinh"/1
+1			F		"sqrt"/1
+1			N	-W-E-C	"SQRT1_2" := 0 # TODO
+1			N	-W-E-C	"SQRT2" := 0 # TODO
+1			F		"tan"/1
+6			F		"tanh"/1
+6			F		"trunc"/1
+6			S	-W-E+C	[Symbol.toStringTag] := "Math"
+# included from ES4.2008
+4		*	-W-E-C-X	"meta" := "JS_meta" <Namespace>
+# Note: In ECMAScript 4 the constructor takes only one argument (TODO)
+X,4		C		Namespace/2
+X,4			:		"JS::Class::Namespace"
+4			=		"JS::Runtime::Builtin::NamespaceClass"
+X,4			O	-W-E-C+I	"prototype" <Object>
+X!4				S	-W+E-C	"prefix" := ""
+X!4				S	-W+E-C	"uri" := ""
+X				C		"constructor" := Namespace
+X,4				F		"toString"/0
+			>
+X				S	-W+E-C	"prefix"
+X				S	-W+E-C	"uri"
+1		N	-W-E-C	"NaN" := NaN <Number>
+4		C		Never/1
+4			=		"JS::Runtime::Builtin::NeverClass"
+4		C		Null/1
+4			=		"JS::Runtime::Builtin::NullClass"
+1		C		Number/1 <: GeneralNumber
+1			:		"JS::Class::Number"
+4			=		"JS::Runtime::Builtin::NumberClass"
+6			N	-W-E-C	"EPSILON" := 0 # TODO
+6			F		"isFinite"/1
+6			F		"isInteger"/1
+6			F		"isNaN"/1
+6			F		"isSafeInteger"/1
+6			N	-W-E-C	"MAX_SAFE_INTEGER" := 0 # TODO
+1			N	-W-E-C	"MAX_VALUE" := 0 <Number> # TODO
+6			N	-W-E-C	"MIN_SAFE_INTEGER" := 0 # TODO
+1			N	-W-E-C	"MIN_VALUE" := 0 <Number> # TODO
+1			N	-W-E-C	"NaN" := NaN <Number>
+1			N	-W-E-C	"NEGATIVE_INFINITY" := -Infinity <Number>
+6			F		"parseFloat"/1
+6			F		"parseInt"/2
+1			N	-W-E-C	"POSITIVE_INFINITY" := Infinity <Number>
+1			O	-W-E-C+I	"prototype" {Number} <Object>
+1!4				N		[[NumberData]] := +0.0
+1				C		"constructor" := Number <Class>
+3!4				F		"toExponential"/1
+3!4				F		"toFixed"/1
+3!4				F		"toLocaleString"/0
+3!4				F		"toPrecision"/1
+1				F		"toString"/1
+1				F		"valueOf"/0
+1		C		Object/1 <: null # @[new] Object([value])
+1			:		"JS::Class::OrdinaryObject"
+4			=		"JS::Runtime::Builtin::ObjectClass"
+6			F		"assign"/2 # @Object.assign(target, ...sources)
+5			F		"create"/2 # @Object.create(O, Properties)
+5			F		"defineProperties"/2 # @Object.defineProperties(O, Properties)
+5			F		"defineProperty"/3 # @Object.defineProperty(O, P, Attributes)
+8			F		"entries"/1 # @Object.entries(O)
+5			F		"freeze"/1 # @Object.freeze(O)
+10			F		"fromEntries"/1 # @Object.fromEntries(iterable)
+5			F		"getOwnPropertyDescriptor"/2 # @Object.getOwnPropertyDescriptor(O, P)
+8			F		"getOwnPropertyDescriptors"/1 # @Object.getOwnPropertyDescriptors(O)
+5			F		"getOwnPropertyNames"/1 # @Object.getOwnPropertyNames(O)
+6			F		"getOwnPropertySymbols"/1 # @Object.getOwnPropertySymbols(O)
+5			F		"getPrototypeOf"/1 # @Object.getPrototypeOf(O)
+15			F		"groupBy"/2
+13			F		"hasOwn"/2 # @Object.hasOwn(O, P)
+6			F		"is"/2 # @Object.is(value1, value2)
+5			F		"isExtensible"/1 # @Object.isExtensible(O)
+5			F		"isFrozen"/1 # @Object.isFrozen(O)
+5			F		"isSealed"/1 # @Object.isSealed(O)
+5			F		"keys"/1 # @Object.keys(O)
+5			F		"preventExtensions"/1 # @Object.preventExtensions(O)
+1			O	-W-E-C+I	"prototype" : null {ImmutablePrototypeObject} <ImmutablePrototypeObject>
+8				F		"__defineGetter__"/2
+8				F		"__defineSetter__"/2
+8				F		"__lookupGetter__"/1
+8				F		"__lookupSetter__"/1
+6				A	-E+C	"__proto__"
+6					F		get
+6					F		set
+1				C		"constructor" := Object
+3				F		"hasOwnProperty"/1 # @Object.prototype.hasOwnProperty(V)
+3				F		"isPrototypeOf"/1 # @Object.prototype.isPrototypeOf(V)
+3				F		"propertyIsEnumerable"/1 # @Object.prototype.propertyIsEnumerable(V)
+4				F		"sealProperty"/1 # @Object.prototype.sealProperty(arg)
+3				F		"toLocaleString"/0 # @Object.prototype.toLocaleString([reserved1[, reserved2]])
+1				F		"toString"/0 # @Object.prototype.toString()
+1				F		"valueOf"/0 # @Object.prototype.valueOf()
+5			F		"seal"/1 # @Object.seal(O)
+6			F		"setPrototypeOf"/2 # @Object.setPrototypeOf(O, proto)
+8			F		"values"/1 # @Object.values(O)
+4		F	-W-E-C	"override"/1
+4		C		Package/1
+4			=		"JS::Runtime::Builtin::PackageClass"
+4			O	-W-E-C+I	"prototype" := Object.prototype
+1		F		"parseFloat"/1
+1		F		"parseInt"/1
+4		F		"parseLong"/1
+6		C		Promise/1
+6			F		"all"/1
+11			F		"allSettled"/1
+12			F		"any"/1
+6			O	-W-E-C	"prototype"
+6				F		"catch"/1
+6				C		"constructor" := Promise
+9				F		"finally"/1
+6				F		"then"/2
+6				S	-W-E+C	[Symbol.toStringTag] := "Promise"
+6			F		"race"/1
+6			F		"reject"/1
+6			F		"resolve"/1
+16			F		"try"/1
+15			F		"withResolvers"/0
+6			A		[Symbol.species]
+6				F		get = "get [Symbol.species]"
+4		*	-W-E-C	"prototype" := "JSValue(JSCompoundAttribute().WithPrototype(true))" <Attribute>
+4		C		PrototypeFunction/1 <: Function
+4			=		"JS::Runtime::Builtin::PrototypeFunctionClass"
+4			O	-W-E-C+I	"prototype" := Function.prototype
+			>
+4				O	+W-E-C+I+F	"prototype" := undefined <Object>
+6		C		"Proxy" := Proxy
+X		C		QName/2
+4			=		"JS::Runtime::Builtin::QNameClass"
+X			O	-W-E-C+I	"prototype"
+X				S	-W+E-C	"localName" := ""
+X				S	-W+E-C	"uri" := ""
+X				C		"constructor" := QName
+X				F		"toString"/0
+			>
+X				S	-W+E-C	"localName"
+X				S	-W+E-C	"uri"
+3		C		"RangeError" := RangeError
+3		C		"ReferenceError" := ReferenceError
+6		O		Reflect
+6			F		"apply"/3
+6			F		"construct"/2
+6			F		"defineProperty"/3
+6			F		"deleteProperty"/2
+6			F		"get"/2
+6			F		"getOwnPropertyDescriptor"/2
+6			F		"getPrototypeOf"/1
+6			F		"has"/2
+6			F		"isExtensible"/1
+6			F		"ownKeys"/1
+6			F		"preventExtensions"/1
+6			F		"set"/3
+6			F		"setPrototypeOf"/2
+6			S	-W-E+C	[Symbol.toStringTag] := "Reflect"
+3		C		RegExp/2
+1			:		"JS::Class::RegExp"
+4			=		"JS::Runtime::Builtin::RegExpClass"
+16			F		"escape"/1
+6			O	-W-E-C+I	"prototype" <Object>
+~3!6			O	-W-E-C+I	"prototype" {RegExp} <Object>
+6W				F		"compile"/2
+3				C		"constructor" := RegExp
+3				F		"exec"/1
+9				A		"dotAll"
+9					F		get
+6				A		"flags"
+6					F		get
+6				A		"global"
+6					F		get
+13				A		"hasIndices"
+13					F		get
+6				A		"ignoreCase"
+6					F		get
+6				F		[Symbol.match] = "[Symbol.match]"/1
+11				F		[Symbol.matchAll] = "[Symbol.matchAll]"/1
+6				A		"multiline"
+6					F		get
+6				F		[Symbol.replace] = "[Symbol.replace]"/1
+6				F		[Symbol.search] = "[Symbol.search]"/1
+3!6				S		"source" := ""
+6				A		"source"
+6					F		get
+6				F		[Symbol.split] = "[Symbol.split]"/1
+6				A		"sticky"
+6					F		get
+3				F		"test"/1
+3				F		"toString"/0
+6				A		"unicode"
+6					F		get
+15				A		"unicodeSets"
+15					F		get
+6			A		[Symbol.species]
+6				F		get = "get [Symbol.species]"
+			>
+# TODO: update them to ES4 semantics
+3!6				S	-W-E-C	"source"
+3!6				B	-W-E-C	"global"
+3!6				B	-W-E-C	"ignoreCase"
+3!6				B	-W-E-C	"multiline"
+3				N	+W-E-C	"lastIndex"
+4		%IntegerClass(sbyte, -128, 127)
+6		C		Set/0
+6			O	-W-E-C	"prototype"
+6				F		"add"/1
+6				F		"clear"/0
+6				C		"constructor" := Set
+6				F		"delete"/1
+16				F		"difference"/1
+6				F		"entries"/0
+6				F		"forEach"/1
+6				F		"has"/1
+16				F		"intersection"/1
+16				F		"isDisjointFrom"/1
+16				F		"isSubsetOf"/1
+16				F		"isSupersetOf"/1
+6				F		"keys"/1
+6				A		"size"
+6					F		get
+16				F		"symmetricDifference"/1
+16				F		"union"/1
+6				F		"values"/1
+6				F		[Symbol.iterator] := Set.prototype.values
+6				S	-W-E+C	[Symbol.toStringTag] := "Set"
+6			A		[Symbol.species]
+6				F		get = "get [Symbol.species]"
+8		C		SharedArrayBuffer/1
+8			O	-W-E-C	"prototype"
+8				A		"byteLength"
+8					F		get
+8				C		"constructor" := SharedArrayBuffer
+15				F		"grow"/1
+15				A		"growable"
+15					F		get
+15				A		"maxByteLength"
+15					F		get
+8				F		"slice"/2
+8				S	-W-E+C	[Symbol.toStringTag] := "SharedArrayBuffer"
+8			A		[Symbol.species]
+8				F		get = "get [Symbol.species]"
+4		%IntegerClass(short, -32768, 32767)
+4		*	-W-E-C	"static" := "JSValue(JSCompoundAttribute().WithCategory(JS::Runtime::MemberModifier::Static))" <Attribute>
+1		C		String/1
+1			:		"JS::Class::String"
+4			=		"JS::Runtime::Builtin::StringClass"
+1			F		"fromCharCode"/1
+6			F		"fromCodePoint"/1
+1			O	-W-E-C+I	"prototype" {String} <Object>
+1!4				S		[[StringData]] := ""
+1				N	-W-E-C	"length" := +0.0
+6W				F		"anchor"/1
+13				F		"at"/1
+6W				F		"big"/0
+6W				F		"blink"/0
+6W				F		"bold"/0
+1				F		"charAt"/1
+1				F		"charCodeAt"/1
+6				F		"codePointAt"/1
+3				F		"concat"/1
+1				C		"constructor" := String <Class>
+6				F		"endsWith"/1
+6W				F		"fixed"/0
+6W				F		"fontcolor"/1
+6W				F		"fontsize"/1
+6				F		"includes"/1
+1				F		"indexOf"/1
+15				F		"isWellFormed"/0
+6W				F		"italics"/1
+1				F		"lastIndexOf"/1
+6W				F		"link"/1
+3				F		"localeCompare"/1
+3				F		"match"/1
+11				F		"matchAll"/1
+6				F		"normalize"/0
+8				F		"padEnd"/1
+8				F		"padStart"/1
+6				F		"repeat"/1
+3				F		"replace"/2
+12				F		"replaceAll"/2
+3				F		"search"/1
+3				F		"slice"/2
+6W				F		"small"/0
+1				F		"split"/2
+6				F		"startsWith"/1
+6W				F		"strike"/0
+6W				F		"sub"/0
+3W				F		"substr"/2
+1				F		"substring"/2
+6W				F		"sup"/0
+3				F		"toLocaleLowerCase"/0
+3				F		"toLocaleUpperCase"/0
+1				F		"toLowerCase"/0
+1				F		"toString"/0
+1				F		"toUpperCase"/0
+15				F		"toWellFormed"/0
+5				F		"trim"/0
+10				F		"trimEnd"/0
+10W				F		"trimLeft" := String.prototype.trimStart
+10W				F		"trimRight" := String.prototype.trimEnd
+10				F		"trimStart"/0
+1				F		"valueOf"/0
+6				F		[Symbol.iterator] = "[Symbol.iterator]"/0
+6			F		"raw"/1
+			>
+1!4				N	-W-E-C	"length"
+4				A	-C+I	"length"
+4					F	-E+F	get
+6		C		Symbol/0
+9			Z	-W-E-C	"asyncIterator"
+6			F		"for"/1
+6			Z	-W-E-C	"hasInstance"
+6			Z	-W-E-C	"isConcatSpreadable"
+6			Z	-W-E-C	"iterator"
+6			F		"keyFor"/1
+6			Z	-W-E-C	"match"
+11			Z	-W-E-C	"matchAll"
+6			O	-W-E-C	"prototype"
+6				C		"constructor" := Symbol
+10				A		"descriptor"
+10					F		get
+6				F		"toString"/0
+6				F		"valueOf"/0
+6				F	-W-E-C	[Symbol.toPrimitive] = "[Symbol.toPrimitive]"/1
+6				S	-W-E+C	[Symbol.toStringTag] := "Symbol"
+6			Z	-W-E-C	"replace"
+6			Z	-W-E-C	"search"
+6			Z	-W-E-C	"species"
+6			Z	-W-E-C	"split"
+6			Z	-W-E-C	"toPrimitive"
+6			Z	-W-E-C	"toStringTag"
+6			Z	-W-E-C	"unscopables"
+3		C		"SyntaxError" := SyntaxError
+3		C		"TypeError" := TypeError
+4		%IntegerClass(uint, 0, 4294967295)
+6		%TypedArray(Uint8Array, Uint8, 1)
+6		%TypedArray(Uint8ClampedArray, Uint8Clamped, 1)
+6		%TypedArray(Uint16Array, Uint16, 2)
+6		%TypedArray(Uint32Array, Uint32, 4)
+4		C		ulong/1 <: GeneralNumber
+4			=		"JS::Runtime::Builtin::UlongClass"
+4			O	-W-E-C+I	"prototype" <Object>
+4				C		"constructor" := ulong <Class>
+4				F		"toString"/1
+4				F		"valueOf"/1
+4			I		"MAX_VALUE" := 18446744073709551615 <ulong>
+4			I		"MIN_VALUE" := 0 <ulong>
+3		U	-W-E-C	"undefined" <Void>
+W1		F		"unescape"/1
+4		%NativeError(UninitializedError)
+4		*	-W-E-C	"unused" := "JSValue(JSCompoundAttribute().WithUnused(true))" <Attribute>
+3		C		"URIError" := URIError
+4		%IntegerClass(ushort, 0, 65535)
+4		C		Void/1
+4			=		"JS::Runtime::Builtin::VoidClass"
+4		*	-W-E-C	"virtual" := "JSValue(JSCompoundAttribute().WithCategory(JS::Runtime::MemberModifier::Virtual))" <Attribute>
+6		C		WeakMap/0
+6			O	-W-E-C	"prototype"
+6				C		"constructor" := WeakMap
+6				F		"delete"/1
+6				F		"get"/1
+6				F		"has"/1
+6				F		"set"/2
+6				S	-W-E+C	[Symbol.toStringTag] := "Map"
+12		C		WeakRef/1
+12			O	-W-E-C	"prototype"
+12				C		"constructor" := WeakRef
+12				F		"deref"/0
+12				S	-W-E+C	[Symbol.toStringTag] := "WeakRef"
+6		C		WeakSet/0
+6			O	-W-E-C	"prototype"
+6				F		"add"/1
+6				C		"constructor" := WeakSet
+6				F		"delete"/1
+6				F		"has"/1
+6				S	-W-E+C	[Symbol.toStringTag] := "WeakSet"
+X		C		XML/1
+X			:		"JS::Class::XML"
+4			=		"JS::Runtime::Builtin::XMLClass"
+X!4			O	-W-E-C	"prototype" {XML}
+# TODO: only 4+X
+~4			O	-W-E-C+I	"prototype"
+X				C		"constructor" := XML
+X				F		"addNamespace"/1
+X				F		"appendChild"/1
+X				F		"attribute"/1
+X				F		"attributes"/0
+X				F		"child"/1
+X				F		"childIndex"/0
+X				F		"children"/0
+X				F		"comments"/0
+X				F		"contains"/1
+X				F		"copy"/0
+X				F		"descendants"/0
+XW				F		"domNode"/0
+XW				F		"domNodeList"/0
+X				F		"elements"/0
+X				F		"hasOwnProperty"/1
+X				F		"hasComplexContent"/0
+X				F		"hasSimpleContent"/0
+X				F		"inScopeNamespaces"/0
+X				F		"insertChildAfter"/2
+X				F		"insertChildBefore"/2
+X				F		"length"/0
+X				F		"localName"/0
+X				F		"name"/0
+X				F		"namespace"/0
+X				F		"namespaceDeclarations"/0
+X				F		"nodeKind"/0
+X				F		"normalize"/0
+X				F		"parent"/0
+X				F		"processingInstructions"/0
+X				F		"prependChild"/1
+X				F		"propertyIsEnumerable"/1
+X				F		"removeNamespace"/1
+X				F		"replace"/2
+X				F		"setChildren"/1
+X				F		"setLocalName"/1
+X				F		"setName"/1
+X				F		"setNamespace"/1
+X				F		"text"/0
+X				F		"toString"/0
+X				F		"toXMLString"/0
+X				F		"valueOf"/0
+XW				F		"xpath"/1
+X			B	+W-E-C	"ignoreComments" := true
+X			B	+W-E-C	"ignoreProcessingInstructions" := true
+X			B	+W-E-C	"ignoreWhitespace" := true
+X			B	+W-E-C	"prettyPrinting" := true
+X			N	+W-E-C	"prettyIndent" := 2
+X			F		"settings"/0
+X			F		"setSettings"/0
+X			F		"defaultSettings"/0
+X		C		XMLList/1
+X			:		"JS::Class::XMLList"
+4			=		"JS::Runtime::Builtin::XMLListClass"
+X!4			O	-W-E-C	"prototype" {XMLList}
+~4			O	-W-E-C+I	"prototype"
+X				C		"constructor" := XMLList
+X				F		"attribute"/1
+X				F		"attributes"/0
+X				F		"child"/1
+X				F		"children"/0
+X				F		"comments"/0
+X				F		"contains"/1
+X				F		"copy"/0
+X				F		"descendants"/0
+XW				F		"domNode"/0
+XW				F		"domNodeList"/0
+X				F		"elements"/0
+X				F		"hasOwnProperty"/1
+X				F		"hasComplexContent"/0
+X				F		"hasSimpleContent"/0
+X				F		"normalize"/0
+X				F		"parent"/0
+X				F		"processingInstructions"/0
+X				F		"propertyIsEnumerable"/1
+X				F		"text"/0
+X				F		"toString"/0
+X				F		"toXMLString"/0
+X				F		"valueOf"/0
+XW				F		"xpath"/1
+
+1		F	"print"/0
+1		O	console
+# TODO: include other console functions from https://nodejs.org/api/console.html
+1			F	"log"/0
+
+d		F	"_context_stack_size"/0
+d		F	"_log"/0
+d!6!4		C	"_Proxy" := Proxy
+d		F	"_relog"/0
+
+# CommonJS
+1		F	require/1
+# AMD
+1		F	define/3
+
+# Common objects required for versions before they were accessible via the global object
+
+1	C		Error/1
+4		=		"JS::Runtime::Builtin::ErrorClass"
+1		O	-W-E-C+I	"prototype" <Object>
+1			C		"constructor" := Error
+1			S	+W-E-C	"message" := ""
+1			S	+W-E-C	"name" := "Error"
+1			F		"toString"/0
+		>
+4			S	+W+E-C+I-F	"message" := null <String>
+4			S	+W+E-C+I-F	"name" := null <String>
+1	%NativeError(EvalError)
+1	%NativeError(RangeError)
+1	%NativeError(ReferenceError)
+1	%NativeError(SyntaxError)
+1	%NativeError(TypeError)
+1	%NativeError(URIError)
+
+1!4	C		Proxy/2
+1		F		"revocable"/2
+
+# Some objects have names but are not accessible from the global object
+
+####
+# represents the root type of the hierarchy
+1	T		JSObject
+1		:		"JS::Class::Object"
+4	*		Array_private := "JS::New<JS::Class::Namespace>(u""private"")" <Namespace>
+6	T		ArrayIterator
+6	O		ArrayIteratorPrototype : Iterator.prototype
+6		F		"next"/0
+6		S	-W-E+C	[Symbol.toStringTag] := "Array Iterator"
+9	T		AsyncGenerator
+9	O		AsyncGeneratorPrototype : AsyncIteratorPrototype
+9		C	-W-E+C	"constructor" := AsyncGeneratorFunction.prototype
+9		F		"next"/1
+9		F		"return"/1
+9		F		"throw"/1
+9		S	-W-E+C	[Symbol.toStringTag] := "AsyncGenerator"
+9	O		AsyncIteratorPrototype
+9		F		[Symbol.asyncIterator] = "[Symbol.asyncIterator]"/0
+9	T		AsyncFromSyncIterator
+9	O		AsyncFromSyncIteratorPrototype : AsyncIteratorPrototype
+9		F		"next"/0
+9		F		"return"/0
+9		F		"throw"/0
+8	C		AsyncFunction/1
+8		O	-W-E-C	"prototype" : Function.prototype
+8			C	-W-E+C	"constructor" := AsyncFunction
+8			S	-W-E+C	[Symbol.toStringTag] := "AsyncFunction"
+8		>
+8			N	-W-E+C	"length"
+8			S	-W-E+C	"name"
+9	C		AsyncGeneratorFunction/1
+9		O	-W-E-C	"prototype" : Function.prototype
+9			C	-W-E+C	"constructor" := AsyncGeneratorFunction
+9			O	-W-E+C	"prototype" := AsyncGeneratorPrototype
+9			S	-W-E+C	[Symbol.toStringTag] := "AsyncGeneratorFunction"
+9		>
+9			N	-W-E+C	"length"
+9			S	-W-E+C	"name"
+9			O	+W-E-C	"prototype"
+5	T		BoundFunction
+# TODO: pre-ES6, the [[Prototype]] slot is always Function.prototype, in ES6+ it is the prototype of the target function
+1	T		BuiltinFunction
+1		:		"JS::Runtime::Builtin::BuiltinFunction"
+6	T		Generator
+6	C		GeneratorFunction/1
+6		O	-W-E-C	"prototype" : Function.prototype
+6			C	-W-E+C	"constructor" := GeneratorFunction
+6			O	-W-E+C	"prototype" := GeneratorPrototype
+6			S	-W-E+C	[Symbol.toStringTag] := "GeneratorFunction"
+6	O		GeneratorPrototype : Iterator.prototype
+6		C	-W-E+C	"constructor" := GeneratorFunction.prototype
+6		F		"next"/1
+6		F		"return"/1
+6		F		"throw"/1
+6		S	-W-E+C	[Symbol.toStringTag] := "Generator"
+7	T		ImmutablePrototypeObject
+7		:			"JS::Class::ImmutablePrototypeObject"
+16	O		IteratorHelperPrototype
+16		F		"next"/0
+16		F		"return"/0
+16		S	-W-E+C	[Symbol.toStringTag] := "Iterator Helper"
+6	O		IteratorPrototype
+16		A	-E+C	"constructor"
+16			F		get
+16			F		set
+16		F		"drop"/1
+16		F		"every"/1
+16		F		"filter"/1
+16		F		"find"/1
+16		F		"flatMap"/1
+16		F		"forEach"/1
+16		F		"map"/1
+16		F		"reduce"/1
+16		F		"some"/1
+16		F		"take"/1
+16		F		"toArray"/0
+6		F		[Symbol.iterator] = "[Symbol.iterator]"/0
+16		A	-E+C	[Symbol.toStringTag]
+16			F		get = "get [Symbol.toStringTag]"
+16			F		set = "set [Symbol.toStringTag]"
+# based on ActionScript
+# ActionScript: public final class JSON
+4	C		JSONClass/1
+1		:		"JS::Class::Singleton"
+4		=		"JS::Runtime::Builtin::SingletonClass"("JSON", JSONPrototype)
+# to make sure JSON object has the prototype Object.prototype
+4	O		JSONPrototype
+1!4	*		JSON_prototype := Object.prototype <JSObject>
+~4	*		JSON_prototype := JSONPrototype <JSObject>
+6	T		MapIterator
+6		O	-W-E-C	"prototype" : MapIteratorPrototype
+6	O		MapIteratorPrototype : Iterator.prototype
+6		F		"next"/0
+6		S	-W-E+C	[Symbol.toStringTag] := "Map Iterator"
+# based on ActionScript and ES4.2008
+# ActionScript: public final class Math
+# ES4.2008: singleton object of helper class Math, Math.[[Prototype]] has no constructor property, Math.constructor is defined
+4	C		MathClass/1
+1		:		"JS::Class::Singleton"
+4		=		"JS::Runtime::Builtin::SingletonClass"("Math", MathPrototype)
+# to make sure Math object has the prototype Object.prototype
+4	O		MathPrototype
+1!4	*		Math_prototype := Object.prototype <JSObject>
+~4	*		Math_prototype := MathPrototype <JSObject>
+6	T		ModuleNamespace
+6		S	-W-E-C	[Symbol.toStringTag] := "Module"
+6!8		F		[Symbol.iterator] = "[Symbol.iterator]"/0
+#11	T		RegExpStringIterator
+#11		O	-W-E-C	"prototype" : RegExpStringIteratorPrototype
+11	O		RegExpStringIteratorPrototype : Iterator.prototype
+11		F		"next"/0
+11		S	-W-E+C	[Symbol.toStringTag] := "RegExp String Iterator"
+6	T		SetIterator
+6		O	-W-E-C	"prototype" : SetIteratorPrototype
+6	O		SetIteratorPrototype : Iterator.prototype
+6		F		"next"/0
+6		S	-W-E+C	[Symbol.toStringTag] := "Set Iterator"
+# general type for singleton objects (Math, JSON)
+4	T		SingletonClass
+1		:		"JS::Class::Singleton"
+#	T		StringIterator
+#		O	-W-E-C	"prototype" : StringIteratorPrototype
+6	O		StringIteratorPrototype : Iterator.prototype
+6		F		"next"/0
+6		S	-W-E-C	[Symbol.toStringTag] := "String Iterator"
+6	C		TypedArray/0
+6		F		"from"/1
+6		F		"of"/0
+6		O	-W-E-C	"prototype"
+13			F		"at"/1
+6			A		"buffer"
+6				F		get
+6			A		"byteLength"
+6				F		get
+6			A		"byteOffset"
+6				F		get
+6			C		"constructor" := TypedArray
+6			F		"copyWithin"/2
+6			F		"entries"/0
+6			F		"every"/1
+6			F		"fill"/1
+6			F		"filter"/1
+6			F		"find"/1
+6			F		"findIndex"/1
+14			F		"findLast"/1
+14			F		"findLastIndex"/1
+6			F		"forEach"/1
+7			F		"includes"/1
+6			F		"indexOf"/1
+6			F		"join"/1
+6			F		"keys"/0
+6			F		"lastIndexOf"/1
+6			A		"length"
+6				F		get
+6			F		"map"/1
+6			F		"reduce"/1
+6			F		"reduceRight"/1
+6			F		"reverse"/0
+6			F		"set"/1
+6			F		"slice"/2
+6			F		"some"/1
+6			F		"sort"/1
+6			F		"subarray"/2
+6			F		"toLocaleString"/0
+14			F		"toReversed"/0
+14			F		"toSorted"/1
+6			F		"toString"/0
+6			F		"values"/0
+14			F		"with"/2
+6			F		[Symbol.iterator] := TypedArray.prototype.values
+6			A	-E-C	[Symbol.toStringTag]
+6				F		get = "get [Symbol.toStringTag]"
+6		A		[Symbol.species]
+6			F		get = "get [Symbol.species]"
+6	T		TypedArrayConstructor
+6		:		"JS::Runtime::Builtin::TypedArray"
+16	O		WrapForValidIteratorPrototype : Iterator.prototype
+16		F		"next"/0
+16		F		"return"/0
+
